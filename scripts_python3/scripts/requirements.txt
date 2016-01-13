@@ -1,0 +1,7 @@
+Pygments==2.0.2
+blessings==1.6
+bpython==0.14.2
+curtsies==0.1.23
+greenlet==0.4.9
+requests==2.9.1
+six==1.10.0
