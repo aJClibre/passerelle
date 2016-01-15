@@ -21,4 +21,18 @@ cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
 params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
 
-print("data:")
+if not params 	: # si le script est execute en local
+	print("No params !")
+
+dicoParams 	= {} # transformation en dico des params recus
+for p in params :
+#	if params.getvalue('module') == 'remote':
+	print("%s:  %s" % (p, params.getvalue(p)))
+#	dicoParams[p] = escape(params.getvalue(p)) # toujours escape pour eviter l'injection
+
+# for POST and GET parameters
+# http://stackoverflow.com/questions/464040/how-are-post-and-get-variables-handled-in-python
+# response from Schien
+
+# for POST with json
+# http://stackoverflow.com/questions/10718572/post-json-to-python-cgi
