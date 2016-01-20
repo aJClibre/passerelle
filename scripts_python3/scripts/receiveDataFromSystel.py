@@ -24,6 +24,8 @@ params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
 
 # http://stackoverflow.com/questions/464040/how-are-post-and-get-variables-handled-in-python
 POST={}
+
+print(sys.stdin.read())
 args=sys.stdin.read().split('&')
 
 for arg in args: 
@@ -39,10 +41,10 @@ dicoParams 	= {} # transformation en dico des params recus
 ##	print("%s:  %s" % (p, params.getvalue(p)))
 #	dicoParams[p] = escape(params.getvalue(p)) # toujours escape pour eviter l'injection
 
+print("END")
 # for POST and GET parameters
 # http://stackoverflow.com/questions/464040/how-are-post-and-get-variables-handled-in-python
 # response from Schien
 
-print("HELLO")
 # for POST with json
 # http://stackoverflow.com/questions/10718572/post-json-to-python-cgi
