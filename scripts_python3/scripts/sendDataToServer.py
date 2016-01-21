@@ -10,10 +10,10 @@
 ##############################################
 
 import requests
+import json
 from _vars import EnvVar
 
 if __name__ == "__main__":
-    r = requests.post(EnvVar.url, data=EnvVar.data)
-    # NOT WORKING. Have to work with sys.stdin.read() when received
-    #r = requests.post(EnvVar.url, data=json.dumps(EnvVar.data))
+    
+    r = requests.post(EnvVar.url, data=json.dumps(EnvVar.data), headers={ 'Content-Type': 'application/json' })
     print( r.json() ) # r.text
