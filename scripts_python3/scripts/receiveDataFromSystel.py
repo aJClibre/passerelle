@@ -31,7 +31,7 @@ success		= True
 message		= ''
 
 params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
-print(params)
+#print(params)
 #print(sys.stdin.read())
 
 if not params 	: # si le script est execute en local
