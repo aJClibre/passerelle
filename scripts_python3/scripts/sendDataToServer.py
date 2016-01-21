@@ -14,4 +14,6 @@ from _vars import EnvVar
 
 if __name__ == "__main__":
     r = requests.post(EnvVar.url, data=EnvVar.data)
-    print( r.text )
+    # NOT WORKING. Have to work with sys.stdin.read() when received
+    #r = requests.post(EnvVar.url, data=json.dumps(EnvVar.data))
+    print( r.json() ) # r.text
