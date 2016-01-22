@@ -17,7 +17,9 @@
 ###########################################################
 
 # pour etre retourne par apache
-print('Content-type: application/json\r\n\r')
+#print('Content-type: application/json\r\n\r')
+print('Content-type: text/plain')
+print('')
 
 import cgitb, cgi, sys, os
 import json
@@ -47,4 +49,4 @@ if not params 	: # si le script est execute en local
 ##	dicoParams[p] = cgi.escape(params.getvalue(p)) # toujours escape pour eviter l'injection
 
 result = { 'success':success, 'message':message }
-print( json.dumps(result) )
+print(0)
