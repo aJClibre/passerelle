@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 
@@ -22,31 +22,61 @@ print('Content-type: text/plain')
 print('')
 
 import cgitb, cgi, sys, os
-import json
+from xmllib import XmlManager
 
 # http://webpython.codepoint.net/cgi_debugging
 cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
-dicoParams      = {} # transformation en dico des params recus
-result 		= {}
-success		= True
-message		= ''
-
 params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
-#print(params)
-#print(sys.stdin.read())
+##args_get = os.getenv("QUERY_STRING")
+##print( args_get )
 
-if not params 	: # si le script est execute en local
-	success         = False
-	message		= "No params"
+def test_param_get( params, name, tuple_ok ) :
+    """ GET parameter test
+	    Return the error code value (0 or 1 if not in debug mode)
+	    
+    """
+    
+    if not params   :
+        return 8
+	
+    if name not in params.keys():
+        return 8
 
-#print(params.getvalue('data'))
+    code = cgi.escape( params.getvalue( name ) )
 
-#for p in params :
-#	print(p)
-#	if params.getvalue('module') == 'remote':
-#	print("%s:  %s" % (p, params.getvalue(p)))
-##	dicoParams[p] = cgi.escape(params.getvalue(p)) # toujours escape pour eviter l'injection
+    if code not in tuple_ok :
+        return 9
 
-result = { 'success':success, 'message':message }
-print(0)
+    return 1 
+
+
+def return_code_treatment() :
+
+    test = True
+    code = test_param_get( params, 'code', ( 'ovensia', ) )
+    feed = test_param_get( params, 'feedtype', ( '01', ) )
+
+    if code * feed != 1 :
+        if test :
+            return max(code, feed)
+        else :
+            return 0 
+    else :
+        # erreur dans dans les donneees
+        if 'xml' not in params.keys(): 
+            return 2
+        else:
+            data = { 'code': params.getvalue('code'), 'xml': params.getvalue('xml') }
+            # print(type(params.getvalue('xml')))
+            ##xmanage = XmlManager( data )
+            ##return xmanage()
+            return 1
+
+
+print( return_code_treatment() )
+
+if __name__ == "__main__":
+    import doctest
+	# python receiveDataFromSystel.py -v
+    	###doctest.testmod()
