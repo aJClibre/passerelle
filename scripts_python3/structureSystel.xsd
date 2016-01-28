@@ -1,0 +1,42 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="synergi">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="syn_evenement">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="ref_evenement"/>
+              <xs:element type="xs:string" name="libelle"/>
+              <xs:element type="xs:long" name="dateheurecreation"/>
+              <xs:element type="xs:long" name="dateheurepreminterv"/>
+              <xs:element type="xs:string" name="departement_num" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:string" name="numinsee"  minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:string" name="nom_commune" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:string" name="adresse" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:string" name="adresse_numero" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:string" name="adresse_complement" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:float" name="x" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:float" name="y" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:integer" name="id_domaine"/>
+              <xs:element type="xs:integer" name="id_categorie"/>
+              <xs:element type="xs:integer" name="id_type"/>
+              <xs:element type="xs:integer" name="id_sstype"/>
+              <xs:element type="xs:byte" name="cloture" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="syn_maincourante" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="ref_evenement"/>
+              <xs:element type="xs:string" name="redacteur"/>
+              <xs:element type="xs:long" name="dateheure"/>
+              <xs:element type="xs:string" name="objet"/>
+              <xs:element type="xs:string" name="complement"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

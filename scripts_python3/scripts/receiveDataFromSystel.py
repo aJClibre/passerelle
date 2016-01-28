@@ -51,30 +51,48 @@ def test_param_get( params, name, tuple_ok ) :
     return 1 
 
 
-def return_code_treatment() :
-
+def return_code_treatment( code ) :
+    """
+    return the code treatment considering
+    the test context
+    0 or 1 if not in test
+    """
     test = True
+
+    if test :
+        return code
+    else :
+        if code != 1 :
+            return 0
+    return 1
+    
+
+def receive_code_treatment() : 
+
     code = test_param_get( params, 'code', ( 'ovensia', ) )
     feed = test_param_get( params, 'feedtype', ( '01', ) )
 
     if code * feed != 1 :
-        if test :
-            return max(code, feed)
-        else :
-            return 0 
-    else :
-        # erreur dans dans les donneees
-        if 'xml' not in params.keys(): 
-            return 2
-        else:
-            data = { 'code': params.getvalue('code'), 'xml': params.getvalue('xml') }
-            # print(type(params.getvalue('xml')))
-            ##xmanage = XmlManager( data )
-            ##return xmanage()
-            return 1
+        return return_code_treatment( max(code, feed) )
+    
+    # erreur dans dans les donneees
+    if 'xml' not in params.keys(): 
+        return return_code_treatment( 2 ) 
+            
+    data = { 'code': params.getvalue('code'), 'xml': params.getvalue('xml') }
+    # print(type(params.getvalue('xml')))
+    xmanage = XmlManager( data )
+    
+    if not xmanage.progress_ok :
+        return return_code_treatment( xmanage() ) # return False
 
+    xmanage.createXmlFile()
 
-print( return_code_treatment() )
+    #if not xmanage.progress_ok :
+    return return_code_treatment( xmanage() ) # return False
+    
+
+print( receive_code_treatment() )
 
 if __name__ == "__main__":
     import doctest

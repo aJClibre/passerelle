@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 ################################
@@ -13,8 +13,10 @@
 
 import xml.etree.ElementTree as tree
 from lxml import etree
-
+from io import StringIO
 from datetime import datetime
+
+from _vars import EnvVar
 
 class XmlManager( object ) :
     """
@@ -29,22 +31,24 @@ class XmlManager( object ) :
         type string
         """
         
-        self.data   = data
-        self.data_xml   = self.data['xml']
-        self.code   = 1
-        self._id    = None
+        self.data           = data
+        self.data_xml       = self.data['xml']
+        self.code           = 0
+        self._id            = None
+        self.xml_result     = "" 
+        self.progress_ok    = False
+        struct_xml_systel   = '../structureSystel.xsd'
+        struct_xml_orsec    = '../structureOrsec.xsd'
 
         try : 
-            self.root = etree.fromstring( self.data_xml )
+            self.tree = etree.XML( self.data_xml )
         except ( etree.ParseError ) :
-            self.code = 3
-
-    def getRoot( self ):
-        """
-        >>> x.getRoot()
-        'synergi'
-        """
-        return self.root.tag
+            self.code = 2
+        
+        #if self.validateXmlStructure( struct_xml_systel, self.tree ) :
+        self.progress_ok    = True
+        #else : 
+        #    self.code = 3
 
     def createId( self ):
         """
@@ -52,35 +56,56 @@ class XmlManager( object ) :
         time structure : yyyymmddhhmmss
         """
         self._id = datetime.now().strftime('%Y%m%d%H%M%S')
-        elf._id += self.data['code']
-        print(self._id)
-        pass
+        self._id += self.data['code']
+        return self._id
 
     def validateXmlStructure( self ):
+        """
+        """
         # http://lxml.de/validation.html#xmlschema
-        pass
-
-    def extractEvent( self ):
-        pass
-
-    def manageMultipleHands( self ):
-        pass
-
-    def createFile( self ):
+        xml_xsd_file    = etree.parse( '../structureSystel.xsd' )
+        xml_xsd         = etree.XMLSchema( xml_xsd_file )
         
-        pass 
+        #print(xml_xsd.assertValid( self.tree ))
+        return xml_xsd.validate( self.tree )
+
+    def createXmlContent( self ):
+        """
+        """
+        self.event = etree.tostring( self.tree.xpath('syn_evenement')[0], pretty_print = True ).decode("utf-8")
+        self.hands = self.tree.xpath('syn_maincourante')
+
+        if len(self.hands) > 1 :
+            for hand in self.tree.iter("syn_maincourante") :
+                self.xml_result += self.event + \
+                       etree.tostring( hand, encoding = 'utf-8', pretty_print = True ).decode("utf-8")
+        else :
+            self.xml_result = self.data_xml # tree.tostring( self.tree )
+
+        return self.xml_result
+
+    def createXmlFile( self ):
+        head                = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        #body = etree.tostring(self.xml_result)
+        content             = head + "\n" + self.createXmlContent()
+        folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
+        
+        with open( folder_path + self.createId() + ".xml", mode="w", encoding="utf-8" ) as file_result : 
+            file_result.write(content)
+       
+        self.code   = 1 
 
     def __call__( self ):
         """
         >>> x()
         1
         """
-        return self.code 
+        return self.code
 
 
 if __name__ == "__main__":
     import doctest
-    data = {'code': '2A', 'xml': """
+    data = {'code': '02A', 'xml': """
 <synergi>
   <syn_evenement>
     <ref_evenement>298853</ref_evenement>
@@ -89,7 +114,7 @@ if __name__ == "__main__":
   </syn_evenement>
   <syn_maincourante>
     <ref_evenement>298853</ref_evenement>
-    <complement>Passe &#224; l'&#233;tat Termin&#233;</complement>
+    <complement>Passe à l'état Terminé</complement>
   </syn_maincourante>
 </synergi>
     """}

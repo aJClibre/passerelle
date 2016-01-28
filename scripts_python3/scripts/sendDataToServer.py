@@ -45,7 +45,7 @@ def makeRequest(get, post):
 
     >>> from lxml import etree
     >>> data_get    = "?code=ovensia&feedtype=01"
-    >>> data_post   = {'xml':  "<synergi><syn_evenement><ref_evenement>298853</ref_evenement><libelle>TIH / SARTENE / 2A</libelle><dateheurecreation>20150501150704</dateheurecreation></syn_evenement><syn_maincourante><ref_evenement>298853</ref_evenement><complement>Passe &#224; l'&#233;tat Termin&#233;</complement></syn_maincourante></synergi>"}
+    >>> data_post   = {'xml':  "<synergi><syn_evenement><ref_evenement>298853</ref_evenement><libelle>TIH / SARTENE / 2A</libelle><dateheurecreation>20150501150704</dateheurecreation></syn_evenement><syn_maincourante><ref_evenement>298853</ref_evenement><complement>Commence</complement></syn_maincourante><syn_maincourante><ref_evenement>298853</ref_evenement><complement>Passe à l'état Terminé</complement></syn_maincourante></synergi>"}
     >>> makeRequest(data_get, data_post)
     1
     <BLANKLINE>
