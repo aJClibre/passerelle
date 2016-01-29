@@ -1,4 +1,5 @@
-#!/var/www/passerelle/scripts_python3/bin/python
+#!~/.local/bin/python3
+#/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 ################################
@@ -45,10 +46,10 @@ class XmlManager( object ) :
         except ( etree.ParseError ) :
             self.code = 2
         
-        #if self.validateXmlStructure( struct_xml_systel, self.tree ) :
-        self.progress_ok    = True
-        #else : 
-        #    self.code = 3
+        if self.validateXmlStructure( struct_xml_systel, self.tree ) :
+            self.progress_ok    = True
+        else : 
+            self.code = 3
 
     def createId( self ):
         """
