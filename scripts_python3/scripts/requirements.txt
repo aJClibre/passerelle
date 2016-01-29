@@ -1,7 +1,5 @@
-Pygments==2.0.2
-blessings==1.6
-bpython==0.14.2
-curtsies==0.1.23
-greenlet==0.4.9
+lxml==3.5.0
+mock==1.3.0
+pbr==1.8.1
 requests==2.9.1
 six==1.10.0
