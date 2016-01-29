@@ -4,6 +4,7 @@ Contient les scripts simulant la passerelle unifiee SIZIF-SGO-DG
 
 # sendDataToNfrance.py 
 # simule le serveur Systel envoyant une requete POST format REST a NFRANCE
+# utilise doctest
 #
 $ cd /home/arnaudjc/passerelle/scripts_python3
 $ source bin/activate
@@ -17,3 +18,8 @@ $ bpython
 # receiveDataFromSystel.py
 # Recoit la requete de sendDataToNfrance.py
 #
+
+# xmllib.py
+# contient la classe qui traite les donnees POST
+# utilise egalement doctest pour avoir plus de 
+# details sur les erreurs

@@ -38,17 +38,17 @@ class XmlManager( object ) :
         self.xml_result     = "" 
         self.progress_ok    = False
         struct_xml_systel   = '../structureSystel.xsd'
-        struct_xml_orsec    = '../structureOrsec.xsd'
+        #struct_xml_orsec    = '../structureOrsec.xsd'
 
         try : 
             self.tree = etree.XML( self.data_xml )
         except ( etree.ParseError ) :
             self.code = 2
         
-        #if self.validateXmlStructure( struct_xml_systel, self.tree ) :
-        self.progress_ok    = True
-        #else : 
-        #    self.code = 3
+        if self.validateXmlStructure() :
+            self.progress_ok    = True
+        else : 
+            self.code = 3
 
     def createId( self ):
         """
