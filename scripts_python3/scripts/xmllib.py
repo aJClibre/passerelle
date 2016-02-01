@@ -1,5 +1,3 @@
-#!~/.local/bin/python3
-#/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 ################################
