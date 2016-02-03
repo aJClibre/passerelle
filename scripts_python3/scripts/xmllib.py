@@ -1,5 +1,3 @@
-#!~/.local/bin/python3
-#/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 ################################
@@ -19,6 +17,10 @@ from datetime import datetime
 
 from _vars import EnvVar
 
+import logging
+
+logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(asctime)s -- %(levelname)s -- %(message)s')
+
 class XmlManager( object ) :
     """
     Valide la structure des donnees
@@ -36,20 +38,21 @@ class XmlManager( object ) :
         self.data_xml       = self.data['xml']
         self.code           = 0
         self._id            = None
-        self.xml_result     = "" 
+        self.xml_result     = ""
         self.progress_ok    = False
         struct_xml_systel   = '../structureSystel.xsd'
         #struct_xml_orsec    = '../structureOrsec.xsd'
-
-        try : 
+        
+        try :
             self.tree = etree.XML( self.data_xml )
         except ( etree.ParseError ) :
             self.code = 2
         
         if self.validateXmlStructure() :
             self.progress_ok    = True
-        else : 
+        else :
             self.code = 3
+            #self.progress_ok    = True
 
     def createId( self ):
         """
@@ -74,27 +77,31 @@ class XmlManager( object ) :
         """
         """
         self.event = etree.tostring( self.tree.xpath('syn_evenement')[0], pretty_print = True ).decode("utf-8")
+        logging.debug("xmllib.XmlManager.createXmlContent -- event: %s", self.event)
         self.hands = self.tree.xpath('syn_maincourante')
-
+        self.xml_result = '<synergi>\n'
+        
         if len(self.hands) > 1 :
             for hand in self.tree.iter("syn_maincourante") :
                 self.xml_result += self.event + \
-                       etree.tostring( hand, encoding = 'utf-8', pretty_print = True ).decode("utf-8")
+                       etree.tostring( hand, encoding = "utf-8", pretty_print = True ).decode("utf-8")
         else :
             self.xml_result = self.data_xml # tree.tostring( self.tree )
+        
+        self.xml_result += '</synergi>'
 
         return self.xml_result
 
     def createXmlFile( self ):
-        head                = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        head                = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
         #body = etree.tostring(self.xml_result)
         content             = head + "\n" + self.createXmlContent()
         folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
         
-        with open( folder_path + self.createId() + ".xml", mode="w", encoding="utf-8" ) as file_result : 
+        with open( folder_path + self.createId() + ".xml", mode="w", encoding="iso-8859-1" ) as file_result :
             file_result.write(content)
-       
-        self.code   = 1 
+
+        self.code   = 1
 
     def __call__( self ):
         """

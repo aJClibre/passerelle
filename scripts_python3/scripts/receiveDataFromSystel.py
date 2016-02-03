@@ -17,13 +17,16 @@
 # 
 ###########################################################
 
-# pour etre retourne par apache
-#print('Content-type: application/json\r\n\r')
 print('Content-type: text/plain')
 print('')
 
 import cgitb, cgi, sys, os
 from xmllib import XmlManager
+from _vars import EnvVar
+
+import logging
+
+logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(asctime)s -- %(levelname)s -- %(message)s')
 
 # http://webpython.codepoint.net/cgi_debugging
 cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
@@ -59,6 +62,7 @@ def return_code_treatment( code ) :
     0 or 1 if not in test
     """
     test = True
+    logging.debug("receiveDataFromSystel.return_code_treatment -- result code: %d", code )
 
     if test :
         return code
@@ -70,8 +74,8 @@ def return_code_treatment( code ) :
 
 def receive_code_treatment() : 
 
-    code = test_param_get( params, 'code', ( 'ovensia', ) )
-    feed = test_param_get( params, 'feedtype', ( '01', ) )
+    code = test_param_get( params, 'code', EnvVar.listCodePost )
+    feed = test_param_get( params, 'feedtype', EnvVar.listFeedtypePost )
 
     if code * feed != 1 :
         return return_code_treatment( max(code, feed) )
@@ -81,7 +85,7 @@ def receive_code_treatment() :
         return return_code_treatment( 2 ) 
             
     data = { 'code': params.getvalue('code'), 'xml': params.getvalue('xml') }
-    # print(type(params.getvalue('xml')))
+    logging.debug("receiveDataFromSystel.receive_code_treatment -- data post type :%s" , type(params.getvalue('xml')))
     xmanage = XmlManager( data )
     
     if not xmanage.progress_ok :
