@@ -10,7 +10,7 @@
 # 
 ################################
 
-import xml.etree.ElementTree as tree
+#import xml.etree.ElementTree as tree
 from lxml import etree
 from io import StringIO
 from datetime import datetime
@@ -51,8 +51,8 @@ class XmlManager( object ) :
         if self.validateXmlStructure() :
             self.progress_ok    = True
         else :
-            self.code = 3
-            #self.progress_ok    = True
+            #self.code = 3
+            self.progress_ok    = True
 
     def createId( self ):
         """
@@ -80,7 +80,7 @@ class XmlManager( object ) :
         logging.debug("xmllib.XmlManager.createXmlContent -- event: %s", self.event)
         self.hands = self.tree.xpath('syn_maincourante')
         self.xml_result = '<synergi>\n'
-        
+        logging.debug("xmllib.XmlManager.createXmlContent -- 1") 
         if len(self.hands) > 1 :
             for hand in self.tree.iter("syn_maincourante") :
                 self.xml_result += self.event + \
@@ -88,19 +88,22 @@ class XmlManager( object ) :
         else :
             self.xml_result = self.data_xml # tree.tostring( self.tree )
         
-        self.xml_result += '</synergi>'
-
+        logging.debug("xmllib.XmlManager.createXmlContent -- 2")
+        self.xml_result += b'</synergi>'
+        logging.debug("xmllib.XmlManager.createXmlContent -- %s", self.xml_result)
         return self.xml_result
 
     def createXmlFile( self ):
-        head                = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
+        head                = b"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
         #body = etree.tostring(self.xml_result)
-        content             = head + "\n" + self.createXmlContent()
+        content             = head + b"\n" + self.createXmlContent()
+        logging.debug("xmllib.XmlManager.createXmlContent -- %s", content)
         folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
+        logging.debug("xmllib.XmlManager.createXmlContent -- 4")
+        with open( folder_path + self.createId() + ".xml", mode="wb", encoding="iso-8859-1" ) as file_result :
+            file_result.write(content.encode(encoding='UTF-8'))
         
-        with open( folder_path + self.createId() + ".xml", mode="w", encoding="iso-8859-1" ) as file_result :
-            file_result.write(content)
-
+        logging.debug("xmllib.XmlManager.createXmlContent -- 5")
         self.code   = 1
 
     def __call__( self ):
