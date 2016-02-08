@@ -17,20 +17,34 @@
 # 
 ###########################################################
 
-# pour etre retourne par apache
-#print('Content-type: application/json\r\n\r')
 print('Content-type: text/plain')
 print('')
 
-import cgitb, cgi, sys, os
+import cgitb, cgi, sys, os, codecs, io
+import urllib.parse
+
 from xmllib import XmlManager
+from _vars import EnvVar
+
+import logging
+
+logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(asctime)s -- %(levelname)s -- %(message)s')
 
 # http://webpython.codepoint.net/cgi_debugging
-cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
+#####cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
-params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
+###params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
 ##args_get = os.getenv("QUERY_STRING")
 ##print( args_get )
+
+###print(os.environ.get('CONTENT_LENGTH'))
+
+params      = urllib.parse.parse_qs( os.environ.get( 'QUERY_STRING' ))
+#print( int( os.environ.get( 'CONTENT_LENGTH', 0 )))
+#input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+sys.stdin = codecs.getwriter("utf-8")(sys.stdin.detach())
+xml_string  = sys.stdin.read( int( os.environ.get( 'CONTENT_LENGTH', 0 )))
+logging.debug(xml_string)
 
 def test_param_get( params, name, tuple_ok ) :
     """ GET parameter test
@@ -44,7 +58,7 @@ def test_param_get( params, name, tuple_ok ) :
     if name not in params.keys():
         return 8
 
-    code = cgi.escape( params.getvalue( name ) )
+    code = cgi.escape( params[ name ][0] )
 
     if code not in tuple_ok :
         return 9
@@ -59,6 +73,7 @@ def return_code_treatment( code ) :
     0 or 1 if not in test
     """
     test = True
+    logging.debug("receiveDataFromSystel.return_code_treatment -- result code: %d", code )
 
     if test :
         return code
@@ -70,18 +85,18 @@ def return_code_treatment( code ) :
 
 def receive_code_treatment() : 
 
-    code = test_param_get( params, 'code', ( 'ovensia', ) )
-    feed = test_param_get( params, 'feedtype', ( '01', ) )
+    code = test_param_get( params, 'code', EnvVar.listCodePost )
+    feed = test_param_get( params, 'feedtype', EnvVar.listFeedtypePost )
 
     if code * feed != 1 :
         return return_code_treatment( max(code, feed) )
     
     # erreur dans dans les donneees
-    if 'xml' not in params.keys(): 
+    if not xml_string : 
         return return_code_treatment( 2 ) 
             
-    data = { 'code': params.getvalue('code'), 'xml': params.getvalue('xml') }
-    # print(type(params.getvalue('xml')))
+    data = { 'code': params['code'][0], 'xml': xml_string }
+    logging.debug("receiveDataFromSystel.receive_code_treatment -- data post type :%s" , type( xml_string ))
     xmanage = XmlManager( data )
     
     if not xmanage.progress_ok :

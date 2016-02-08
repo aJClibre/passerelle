@@ -10,12 +10,16 @@
 # 
 ################################
 
-import xml.etree.ElementTree as tree
+#import xml.etree.ElementTree as tree
 from lxml import etree
 from io import StringIO
 from datetime import datetime
 
 from _vars import EnvVar
+
+import logging
+
+logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(asctime)s -- %(levelname)s -- %(message)s')
 
 class XmlManager( object ) :
     """
@@ -34,20 +38,21 @@ class XmlManager( object ) :
         self.data_xml       = self.data['xml']
         self.code           = 0
         self._id            = None
-        self.xml_result     = "" 
+        self.xml_result     = ""
         self.progress_ok    = False
         struct_xml_systel   = '../structureSystel.xsd'
         #struct_xml_orsec    = '../structureOrsec.xsd'
-
-        try : 
+        
+        try :
             self.tree = etree.XML( self.data_xml )
         except ( etree.ParseError ) :
             self.code = 2
         
         if self.validateXmlStructure() :
             self.progress_ok    = True
-        else : 
-            self.code = 3
+        else :
+            #self.code = 3
+            self.progress_ok    = True
 
     def createId( self ):
         """
@@ -72,27 +77,34 @@ class XmlManager( object ) :
         """
         """
         self.event = etree.tostring( self.tree.xpath('syn_evenement')[0], pretty_print = True ).decode("utf-8")
+        logging.debug("xmllib.XmlManager.createXmlContent -- event: %s", self.event)
         self.hands = self.tree.xpath('syn_maincourante')
-
+        self.xml_result = '<synergi>\n'
+        logging.debug("xmllib.XmlManager.createXmlContent -- 1") 
         if len(self.hands) > 1 :
             for hand in self.tree.iter("syn_maincourante") :
                 self.xml_result += self.event + \
-                       etree.tostring( hand, encoding = 'utf-8', pretty_print = True ).decode("utf-8")
+                       etree.tostring( hand, encoding = "utf-8", pretty_print = True ).decode("utf-8")
         else :
             self.xml_result = self.data_xml # tree.tostring( self.tree )
-
+        
+        logging.debug("xmllib.XmlManager.createXmlContent -- 2")
+        self.xml_result += b'</synergi>'
+        logging.debug("xmllib.XmlManager.createXmlContent -- %s", self.xml_result)
         return self.xml_result
 
     def createXmlFile( self ):
-        head                = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        head                = b"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
         #body = etree.tostring(self.xml_result)
-        content             = head + "\n" + self.createXmlContent()
+        content             = head + b"\n" + self.createXmlContent()
+        logging.debug("xmllib.XmlManager.createXmlContent -- %s", content)
         folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
+        logging.debug("xmllib.XmlManager.createXmlContent -- 4")
+        with open( folder_path + self.createId() + ".xml", mode="wb", encoding="iso-8859-1" ) as file_result :
+            file_result.write(content.encode(encoding='UTF-8'))
         
-        with open( folder_path + self.createId() + ".xml", mode="w", encoding="utf-8" ) as file_result : 
-            file_result.write(content)
-       
-        self.code   = 1 
+        logging.debug("xmllib.XmlManager.createXmlContent -- 5")
+        self.code   = 1
 
     def __call__( self ):
         """
