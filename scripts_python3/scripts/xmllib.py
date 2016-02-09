@@ -45,15 +45,19 @@ class XmlManager( object ) :
         try :
             logging.debug("xmllib.XmlManager.__init__-- xml: %s", self.data['xml'])
             self.tree = etree.XML( self.data_xml )
+            logging.debug("xmllib.XmlManager.__init__-- tree: %s", self.tree)
+
+            if self.validateXmlStructure() :
+                logging.debug("xmllib.XmlManager.__init__-- validate: OK")
+                self.progress_ok    = True
+            else :
+                logging.debug("xmllib.XmlManager.__init__-- validate: KO")
+                self.code = 3
 
         except ( etree.ParseError ) :
+            logging.debug("xmllib.XmlManager.__init__-- parse: except parse error")
             self.code = 2
         
-        if self.validateXmlStructure() :
-            self.progress_ok    = True
-        else :
-            self.code = 3
-            #self.progress_ok    = True
 
     def createId( self ):
         """
@@ -72,17 +76,17 @@ class XmlManager( object ) :
         xml_xsd         = etree.XMLSchema( xml_xsd_file )
         
         # Uncomment the line to display validation error in the terminal
-        #print(xml_xsd.assertValid( self.tree ))
+        xml_xsd.assertValid( self.tree)
         return xml_xsd.validate( self.tree )
 
     def createXmlContent( self ):
         """
         """
         self.event = etree.tostring( self.tree.xpath('syn_evenement')[0], pretty_print = True ).decode("utf-8")
-        
+        logging.debug("xmllib.XmlManager.createXmlContent -- event: %s", self.event)
         self.hands = self.tree.xpath('syn_maincourante')
         self.xml_result = '<synergi>\n'
-        
+        logging.debug("xmllib.XmlManager.createXmlContent -- len(self.hands): %s", str(len(self.hands)))
         if len(self.hands) > 1 :
             for hand in self.tree.iter("syn_maincourante") :
                 self.xml_result += self.event + \
@@ -91,14 +95,14 @@ class XmlManager( object ) :
 
         else :
             self.xml_result = self.data_xml # tree.tostring( self.tree )
-        
+        logging.debug("xmllib.XmlManager.createXmlContent -- xml_result: %s", self.xml_result) 
         return self.xml_result
 
     def createXmlFile( self ):
         head                = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
-        
+        logging.debug("xmllib.XmlManager.createXmlContent -- head: %s", head)
         content             = head + "\n" + self.createXmlContent()
-        #logging.debug("xmllib.XmlManager.createXmlContent -- %s", content)
+        logging.debug("xmllib.XmlManager.createXmlContent -- content: %s", content)
         folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
         
         with open( folder_path + self.createId() + ".xml", mode="w", encoding="iso-8859-1" ) as file_result :

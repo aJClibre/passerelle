@@ -23,7 +23,7 @@
 # '1\n'
 ###########################################################
 
-print('Content-type: text/plain')
+print('Content-type: application/xml')
 print('')
 
 import cgitb, cgi, sys, os, codecs, io
@@ -105,16 +105,16 @@ def receive_code_treatment() :
     logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- data get :%s" , data )
 
     xmanage = XmlManager( data )
-    
+    logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- xmanage :%s" , xmanage.progress_ok )
     if not xmanage.progress_ok :
         return return_code_treatment( xmanage() ) 
-
+    logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- xmanage.createXmlFile()" )
     xmanage.createXmlFile()
 
     return return_code_treatment( xmanage() ) 
     
-
-print( receive_code_treatment() )
+# to avoid \n a the end of the sentence
+print( receive_code_treatment(), end="" )
 
 if __name__ == "__main__":
     import doctest
