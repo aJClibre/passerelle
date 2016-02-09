@@ -30,7 +30,7 @@ class XmlManager( object ) :
 
     def __init__( self, data ):
         """
-        data = {'xml': params.getvalue('xml'), 'code': params.getvalue('code')}
+        data = {'xml': , 'code': }
         type string
         """
         
@@ -40,19 +40,20 @@ class XmlManager( object ) :
         self._id            = None
         self.xml_result     = ""
         self.progress_ok    = False
-        struct_xml_systel   = '../structureSystel.xsd'
-        #struct_xml_orsec    = '../structureOrsec.xsd'
+        self.struct_xml     = '../structureSystel.xsd'
         
         try :
+            logging.debug("xmllib.XmlManager.__init__-- xml: %s", self.data['xml'])
             self.tree = etree.XML( self.data_xml )
+
         except ( etree.ParseError ) :
             self.code = 2
         
         if self.validateXmlStructure() :
             self.progress_ok    = True
         else :
-            #self.code = 3
-            self.progress_ok    = True
+            self.code = 3
+            #self.progress_ok    = True
 
     def createId( self ):
         """
@@ -67,9 +68,10 @@ class XmlManager( object ) :
         """
         """
         # http://lxml.de/validation.html#xmlschema
-        xml_xsd_file    = etree.parse( '../structureSystel.xsd' )
+        xml_xsd_file    = etree.parse( self.struct_xml )
         xml_xsd         = etree.XMLSchema( xml_xsd_file )
         
+        # Uncomment the line to display validation error in the terminal
         #print(xml_xsd.assertValid( self.tree ))
         return xml_xsd.validate( self.tree )
 
@@ -77,33 +79,32 @@ class XmlManager( object ) :
         """
         """
         self.event = etree.tostring( self.tree.xpath('syn_evenement')[0], pretty_print = True ).decode("utf-8")
-        logging.debug("xmllib.XmlManager.createXmlContent -- event: %s", self.event)
+        
         self.hands = self.tree.xpath('syn_maincourante')
         self.xml_result = '<synergi>\n'
-        logging.debug("xmllib.XmlManager.createXmlContent -- 1") 
+        
         if len(self.hands) > 1 :
             for hand in self.tree.iter("syn_maincourante") :
                 self.xml_result += self.event + \
                        etree.tostring( hand, encoding = "utf-8", pretty_print = True ).decode("utf-8")
+            self.xml_result += '</synergi>\n'
+
         else :
             self.xml_result = self.data_xml # tree.tostring( self.tree )
         
-        logging.debug("xmllib.XmlManager.createXmlContent -- 2")
-        self.xml_result += b'</synergi>'
-        logging.debug("xmllib.XmlManager.createXmlContent -- %s", self.xml_result)
         return self.xml_result
 
     def createXmlFile( self ):
-        head                = b"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
-        #body = etree.tostring(self.xml_result)
-        content             = head + b"\n" + self.createXmlContent()
-        logging.debug("xmllib.XmlManager.createXmlContent -- %s", content)
-        folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
-        logging.debug("xmllib.XmlManager.createXmlContent -- 4")
-        with open( folder_path + self.createId() + ".xml", mode="wb", encoding="iso-8859-1" ) as file_result :
-            file_result.write(content.encode(encoding='UTF-8'))
+        head                = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
         
-        logging.debug("xmllib.XmlManager.createXmlContent -- 5")
+        content             = head + "\n" + self.createXmlContent()
+        #logging.debug("xmllib.XmlManager.createXmlContent -- %s", content)
+        folder_path         = EnvVar.xmlFolderPath + EnvVar.xmlFolderName
+        
+        with open( folder_path + self.createId() + ".xml", mode="w", encoding="iso-8859-1" ) as file_result :
+            file_result.write(content)
+        
+        
         self.code   = 1
 
     def __call__( self ):
