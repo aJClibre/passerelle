@@ -17,10 +17,10 @@
               <xs:element type="xs:string" name="adresse_complement" minOccurs="0" maxOccurs="1"/>
               <xs:element type="xs:float" name="x" minOccurs="0" maxOccurs="1"/>
               <xs:element type="xs:float" name="y" minOccurs="0" maxOccurs="1"/>
-              <xs:element type="xs:integer" name="id_domaine"/>
-              <xs:element type="xs:integer" name="id_categorie"/>
-              <xs:element type="xs:integer" name="id_type"/>
-              <xs:element type="xs:integer" name="id_sstype"/>
+              <xs:element type="xs:integer" name="id_domaine" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:integer" name="id_categorie" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:integer" name="id_type" minOccurs="0" maxOccurs="1"/>
+              <xs:element type="xs:integer" name="id_sstype" minOccurs="0" maxOccurs="1"/>
               <xs:element type="xs:byte" name="cloture" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
           </xs:complexType>
