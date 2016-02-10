@@ -1,5 +1,5 @@
+#!/var/www/passerelle/scripts_python3/bin/python
 #!/home/users/k1024/.local/bin/python3
-#/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 
@@ -26,7 +26,8 @@
 print('Content-type: text/plain')
 print('')
 
-import cgitb, cgi, sys, os, codecs, io
+import cgitb, cgi, sys, os
+#import codecs, io
 import urllib.parse
 
 from xmllib import XmlManager
@@ -39,17 +40,6 @@ logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(as
 # http://webpython.codepoint.net/cgi_debugging
 cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
-params      = urllib.parse.parse_qs( os.environ.get( 'QUERY_STRING' ))
-
-###########
-# Read the raw post data in the standart stream
-# Impossible to have accentuated letters. Put a try/except to see why
-# A lot of solutions have been try :
-# params   = cgi.FieldStorage() # but not good for raw input
-#input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
-#sys.stdin = codecs.getwriter("utf-8")(sys.stdin.detach())
-###########
-xml_string  = sys.stdin.read( int( os.environ.get( 'CONTENT_LENGTH', 0 )))
 
 def test_param_get( params, name, tuple_ok ) :
     """ GET parameter test
@@ -77,7 +67,7 @@ def return_code_treatment( code ) :
     the test context
     0 or 1 if not in test
     """
-    test = True
+    test = EnvVar.testMode
     logging.debug("receiveDataFromSystel.return_code_treatment -- result code: %d", code )
 
     if test :
@@ -111,9 +101,28 @@ def receive_code_treatment() :
     xmanage.createXmlFile()
 
     return return_code_treatment( xmanage() ) 
-    
+   
+
+params      = urllib.parse.parse_qs( os.environ.get( 'QUERY_STRING' ))
+
+###########
+# Read the raw post data in the standart stream
+# Impossible to have accentuated letters. Put a try/except to see why
+# A lot of solutions have been try :
+# params   = cgi.FieldStorage() # but not good for raw input
+#input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+#sys.stdin = codecs.getwriter("utf-8")(sys.stdin.detach())
+###########
+try :
+    xml_string  = sys.stdin.read( int( os.environ.get( 'CONTENT_LENGTH', 0 )))
+
+except ( UnicodeDecodeError ) :
+    print( return_code_treatment( 4 ), end="" )
+    sys.exit()
+ 
 # to avoid \n a the end of the sentence
 print( receive_code_treatment(), end="" )
+
 
 if __name__ == "__main__":
     import doctest

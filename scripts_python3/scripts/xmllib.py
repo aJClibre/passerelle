@@ -40,7 +40,7 @@ class XmlManager( object ) :
         self._id            = None
         self.xml_result     = ""
         self.progress_ok    = False
-        self.struct_xml     = '../structureSystel.xsd'
+        self.struct_xml     = EnvVar.structureXmlFile
         
         try :
             logging.debug("xmllib.XmlManager.__init__-- xml: %s", self.data['xml'])
@@ -54,7 +54,7 @@ class XmlManager( object ) :
                 logging.debug("xmllib.XmlManager.__init__-- validate: KO")
                 self.code = 3
 
-        except ( etree.ParseError ) :
+        except ( etree.ParseError, ValueError ) :
             logging.debug("xmllib.XmlManager.__init__-- parse: except parse error")
             self.code = 2
         
@@ -76,7 +76,7 @@ class XmlManager( object ) :
         xml_xsd         = etree.XMLSchema( xml_xsd_file )
         
         # Uncomment the line to display validation error in the terminal
-        xml_xsd.assertValid( self.tree)
+        #xml_xsd.assertValid( self.tree)
         return xml_xsd.validate( self.tree )
 
     def createXmlContent( self ):
