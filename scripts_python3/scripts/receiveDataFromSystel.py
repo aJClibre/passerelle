@@ -1,5 +1,5 @@
-#!/var/www/passerelle/scripts_python3/bin/python
-#/home/users/k1024/.local/bin/python3
+#!/home/users/k1024/.local/bin/python3
+#/var/www/passerelle/scripts_python3/bin/python
 # -*- coding: UTF-8 -*-
 
 
@@ -20,7 +20,7 @@
 # >>> header = {'content-type': 'application/xml'}
 # >>> r = requests.post("http://sys.pont-entente.org/sys/passerelle/xml"+data_get, data=data_post, headers=header)
 # >>> r.text
-# '1\n'
+# '1'
 ###########################################################
 
 print('Content-type: text/plain')
@@ -39,7 +39,6 @@ logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(as
 # http://webpython.codepoint.net/cgi_debugging
 cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
-###params	= cgi.FieldStorage() # recuperation des parametres contenus dans l'URL
 params      = urllib.parse.parse_qs( os.environ.get( 'QUERY_STRING' ))
 
 ###########
