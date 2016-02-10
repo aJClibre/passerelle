@@ -23,7 +23,7 @@
 # '1\n'
 ###########################################################
 
-print('Content-type: application/xml')
+print('Content-type: text/plain')
 print('')
 
 import cgitb, cgi, sys, os, codecs, io
