@@ -1,5 +1,5 @@
-#!/home/users/k1024/.local/bin/python3
-#/var/www/passerelle/scripts_python3/bin/python
+#!/var/www/passerelle/scripts_python3/bin/python
+#/home/users/k1024/.local/bin/python3
 # -*- coding: UTF-8 -*-
 
 
