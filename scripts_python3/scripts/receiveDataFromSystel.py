@@ -29,16 +29,20 @@ print('')
 import cgitb, cgi, sys, os
 #import codecs, io
 import urllib.parse
+import requests
 
 from xmllib import XmlManager
 from _vars import EnvVar
 
 import logging
 
-logging.basicConfig(filename='receiveData.log',level=logging.DEBUG, format='%(asctime)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename='receiveData.log',level=logging.ERROR, format='%(asctime)s -- %(levelname)s -- %(message)s')
+requests_log = logging.getLogger("requests")
+requests_log.setLevel(logging.ERROR)
+requests_log.propagate = True
 
 # http://webpython.codepoint.net/cgi_debugging
-cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
+###cgitb.enable() # pour les options voir : http://docs.python.org/library/cgi.html
 
 
 def test_param_get( params, name, tuple_ok ) :
@@ -68,7 +72,6 @@ def return_code_treatment( code ) :
     0 or 1 if not in test
     """
     test = EnvVar.testMode
-    logging.debug("receiveDataFromSystel.return_code_treatment -- result code: %d", code )
 
     if test :
         return code
@@ -79,29 +82,63 @@ def return_code_treatment( code ) :
     
 
 def receive_code_treatment() : 
-
-    code = test_param_get( params, 'code', EnvVar.listCodePost )
-    feed = test_param_get( params, 'feedtype', EnvVar.listFeedtypePost )
-
-    if code * feed != 1 :
-        return return_code_treatment( max(code, feed) )
+    """
+    Get the code from the xml post data treatment
+    - test the get parameters
+    - test the structure xml
+    - test the data xml
+    - return the code error in function of test environment
+    """
     
-    # erreur dans dans les donneees
+    # GET params test
+    code = ''
+    test_code = test_param_get( params, 'code', EnvVar.listCodePost )
+    test_feed = test_param_get( params, 'feedtype', EnvVar.listFeedtypePost )
+
+    if test_code * test_feed != 1 :
+        logging.error("**********************receiveDataFromSystel.receive_code_treatment -- code :%s / feedtype : %s" % ( test_code, test_feed ) )
+        return return_code_treatment( max(test_code, test_feed) )
+    
+    code = params[ 'code' ][0]
+    # POST data test
     if not xml_string : 
+        logging.error("**********************receiveDataFromSystel.receive_code_treatment -- No XML POST data" )
         return return_code_treatment( 2 ) 
             
-    data = { 'code': params['code'][0], 'xml': xml_string }
-    logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- data get :%s" , data )
+    data = { 'code': code, 'xml': xml_string }
 
     xmanage = XmlManager( data )
-    logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- xmanage :%s" , xmanage.progress_ok )
+
+    # XML structure test
     if not xmanage.progress_ok :
+        logging.error("**********************receiveDataFromSystel.receive_code_treatment -- xmanage :%s" , xmanage() )
         return return_code_treatment( xmanage() ) 
-    logging.debug("**********************receiveDataFromSystel.receive_code_treatment -- xmanage.createXmlFile()" )
+
+    # Data centent test
     xmanage.createXmlFile()
 
-    return return_code_treatment( xmanage() ) 
-   
+    if xmanage() != 1 :
+        logging.error("**********************receiveDataFromSystel.receive_code_treatment -- xmanage() :%s" , xmanage() )
+        return return_code_treatment( xmanage() )
+
+    # request to ORSEC server
+    # url example = "https://DGSCGC%2forsec7:JD%40%2b2015%21m@www.qualif.portailorsec.interieur.gouv.fr/webservice.php?module=synersync&code=sizif-vlb-170&file=/xml_systel/20160212150143170.xml"
+    url_orsec = EnvVar.url_orsec + code + EnvVar.get_orsec + EnvVar.xmlFolderName + xmanage._id + ".xml"
+    req = requests.get(url_orsec, verify=False)
+
+    if req.status_code == 500 :
+        logging.error("**********************receiveDataFromSystel.receive_code_treatment -- req.status_code :%s" , req.status_code )
+        return return_code_treatment( 2 )
+
+    # All is good : status_code and answer
+    if req.status_code == 200 and req.text == '1' :
+        return return_code_treatment( 1 )
+    
+    logging.error("**********************receiveDataFromSystel.receive_code_treatment -- req.status_code :%s" , req.status_code )
+    logging.error("**********************receiveDataFromSystel.receive_code_treatment -- req.text :%s" , req.text )
+
+    return return_code_treatment( 2 )
+
 
 params      = urllib.parse.parse_qs( os.environ.get( 'QUERY_STRING' ))
 
